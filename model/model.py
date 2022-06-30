@@ -1,22 +1,38 @@
-import torch.nn as nn
+import math
+
+import torch
 import torch.nn.functional as F
+import torchvision
 from base import BaseModel
 
 
-class MnistModel(BaseModel):
-    def __init__(self, num_classes=10):
+class PrimingNet(torch.nn.Module):
+    def __init__(
+        self,
+        pretrained_classifier=torchvision.models.convnext_tiny(pretrained=True),
+        num_classes=1000,
+        confidence=1,
+    ):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, num_classes)
+        self.pretrained_classifier = pretrained_classifier.eval()
+        for param in self.pretrained_classifier.parameters():
+            param.requires_grad = False
+        self.num_classes = num_classes
+        self.prime = torch.nn.Parameter(  # type: ignore
+            torch.zeros(self.num_classes), requires_grad=True
+        )
+        self.optimizer = torch.optim.SGD([self.prime], lr=0.05)
+        self.confidence = confidence
 
-    def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+    def pseudo_ground_truth(self, y_hat: torch.Tensor) -> torch.Tensor:
+        k = math.e + self.confidence
+        return math.log(k) * y_hat
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        self.optimizer.zero_grad()
+        y_hat = self.pretrained_classifier(x) + self.prime
+        y_pseudo = self.pseudo_ground_truth(y_hat)
+        pseudo_loss = F.cross_entropy(y_hat, y_pseudo)
+        pseudo_loss.backward()
+        self.optimizer.step()
+        return y_hat

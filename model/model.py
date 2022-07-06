@@ -21,7 +21,10 @@ class PrimingNet(torch.nn.Module):
         self.prime = torch.nn.Parameter(  # type: ignore
             torch.zeros(self.num_classes), requires_grad=True
         )
-        self.optimizer = torch.optim.SGD([self.prime], lr=0.05)
+        self.initial_lr = 0.05
+        self.optimizer = torch.optim.SGD(
+            [self.prime], lr=self.initial_lr, weight_decay=0.1
+        )
         self.confidence = confidence
 
     def pseudo_ground_truth(self, y_hat: torch.Tensor) -> torch.Tensor:

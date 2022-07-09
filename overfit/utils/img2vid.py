@@ -1,14 +1,9 @@
-import urllib
-from re import A
 from typing import List
 
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
-import torch
 import torchvision.transforms.functional as FT
-from PIL import Image
 from torch import Tensor
-from torchvision import transforms
 
 
 def zigzag(img: Tensor, hcrop, wcrop, maxlen=100) -> List[Tensor]:
@@ -37,11 +32,10 @@ def display_video(vid: List[Tensor]):
         if ix == 0:
             ax.imshow(img.permute(1, 2, 0))
         frames.append([frame])
-    _ = animation.ArtistAnimation(
+    return animation.ArtistAnimation(
         fig,
         frames,
         interval=50,
         blit=True,
         repeat_delay=1000,
     )
-    plt.show()

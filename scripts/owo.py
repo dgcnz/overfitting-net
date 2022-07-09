@@ -1,10 +1,8 @@
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms.functional as FT
+from overfit.utils.img2vid import display_video, zigzag
 from PIL import Image
-from torchvision import transforms
-
-from utils.img2vid import display_video, zigzag
 
 input_image = Image.open("dog.jpg")
 input_tensor = FT.to_tensor(input_image)

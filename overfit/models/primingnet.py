@@ -13,6 +13,7 @@ class PrimingNet(torch.nn.Module):
         confidence=0.1,
         weight_decay=0.1,
         lr_scale=1,
+        momentum=0.9,
     ):
         super().__init__()
         self.pretrained_classifier = pretrained_classifier.eval()
@@ -23,7 +24,9 @@ class PrimingNet(torch.nn.Module):
             torch.zeros(self.num_classes), requires_grad=True
         )
         self.lr_scale = lr_scale
-        self.optimizer = torch.optim.SGD([self.prime], lr=0, weight_decay=weight_decay)
+        self.optimizer = torch.optim.SGD(
+            [self.prime], lr=0, weight_decay=weight_decay, momentum=momentum
+        )
         self.confidence = confidence
 
     def pseudo_ground_truth(self, y_hat: torch.Tensor) -> torch.Tensor:
@@ -35,9 +38,16 @@ class PrimingNet(torch.nn.Module):
         y_src = self.pretrained_classifier(x)
         y_tgt = y_src + self.prime
         y_pseudo = self.pseudo_ground_truth(y_tgt)
-        H_src = torch.distributions.Categorical(logits=y_src).entropy()
+        H_src = torch.distributions.Categorical(logits=y_src).entropy()[0] / math.log2(
+            self.num_classes
+        )
+        new_lr = self.lr_scale * H_src
+        print(f"Entropy: {H_src}")
+        print(f"Learning Rate: {new_lr}")
+        print(f"Norm: {torch.norm(self.prime)}")
+        print(f"Max: {torch.max(self.prime)}")
         for ix, _ in enumerate(self.optimizer.param_groups):
-            self.optimizer.param_groups[ix]["lr"] = self.lr_scale * H_src
+            self.optimizer.param_groups[ix]["lr"] = new_lr
         pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
         pseudo_loss.backward()
         self.optimizer.step()

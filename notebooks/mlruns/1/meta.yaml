@@ -1,0 +1,4 @@
+artifact_location: file:///Users/dgcnz/development/research/overfitting-net/notebooks/mlruns/1
+experiment_id: '1'
+lifecycle_stage: active
+name: test

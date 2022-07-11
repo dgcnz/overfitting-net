@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+o# Byte-compiled / optimized / DLL files
 **/__pycache__/
 *.py[cod]
 *$py.class
@@ -110,3 +110,4 @@ datasets/
 .vscode/
 .idea/
 __MACOSX/
+**/.DS_Store

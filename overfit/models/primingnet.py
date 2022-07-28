@@ -7,6 +7,9 @@ from mlflow import log_metric
 from torchvision.models import ResNet152_Weights, resnet152
 
 
+def log_net():
+
+
 class PrimingNet(torch.nn.Module):
     def __init__(
         self,
@@ -36,6 +39,13 @@ class PrimingNet(torch.nn.Module):
         return math.log(k) * y_hat
 
     def forward(
+        self, x: torch.Tensor
+    ) -> torch.Tensor:
+        y_src = self.pretrained_classifier(x)
+        y_tgt = y_src + self.prime
+        return y_tgt
+
+    def forward_backward(
         self, x: torch.Tensor, y: Optional[int] = None, step: Optional[int] = None
     ) -> torch.Tensor:
         self.optimizer.zero_grad()
@@ -46,6 +56,7 @@ class PrimingNet(torch.nn.Module):
             self.num_classes
         )
         new_lr = self.lr_scale * (1 - H_src)
+        pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
 
         # START logging
 
@@ -86,9 +97,13 @@ class PrimingNet(torch.nn.Module):
             log_metric("Prime Max", torch.max(self.prime).detach().numpy(), step)
 
         # END logging
+
+        # UPDATE
+        self.update(new_lr, pseudo_loss)
+        return y_tgt
+
+    def update(self, new_lr, pseudo_loss):
         for ix, _ in enumerate(self.optimizer.param_groups):
             self.optimizer.param_groups[ix]["lr"] = new_lr
-        pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
         pseudo_loss.backward()
         self.optimizer.step()
-        return y_tgt

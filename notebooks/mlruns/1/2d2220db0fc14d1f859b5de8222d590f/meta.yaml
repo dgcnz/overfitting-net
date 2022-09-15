@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/dgcnz/development/research/overfitting-net/notebooks/mlruns/1/2d2220db0fc14d1f859b5de8222d590f/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: 2d2220db0fc14d1f859b5de8222d590f
+run_uuid: 2d2220db0fc14d1f859b5de8222d590f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1661895096178
+status: 1
+tags: []
+user_id: dgcnz

@@ -21,22 +21,27 @@ class OverfitTrainer:
         num_classes=1000,
         confidence=0.1,
         weight_decay=30,
-        lr_scale=0.5,
+        max_lr=0.1,
         momentum=0.9,
+        initial_lr=0.05,
     ):
         self.weight_decay = weight_decay
         self.momentum = momentum
         self.model = Overfit(pretrained_classifier, num_classes, confidence)
-        self.lr_scale = lr_scale
-        self.optimizer = torch.optim.SGD(
+        self.max_lr = max_lr
+        from torch.optim import SGD
+
+        # from overfit.optimizers.sgdmod import SGDMod
+
+        self.optimizer = SGD(
             [self.model.prime],
-            lr=0,
+            lr=initial_lr,
             weight_decay=weight_decay,
             momentum=momentum,
         )
 
     def forward_backward(
-        self, x: torch.Tensor, y: Optional[int] = None, step: Optional[int] = None
+        self, x: torch.Tensor, y_ix: Optional[int] = None, step: Optional[int] = None
     ) -> torch.Tensor:
         self.optimizer.zero_grad()
         y_src = self.model.pretrained_classifier(x)
@@ -44,23 +49,27 @@ class OverfitTrainer:
         y_pseudo = self.model.pseudo_ground_truth(y_tgt)
         prime = self.model.prime
 
-        #
-        H_src = torch.distributions.Categorical(logits=y_src).entropy()[0] / math.log2(
+        # Normalized to )0, 1)
+        H_src = torch.distributions.Categorical(logits=y_src).entropy()[0] / math.log(
             self.model.num_classes
         )
-        new_lr = self.lr_scale * (1 - H_src)
+        new_lr = self.max_lr * (1 - H_src)
+        assert new_lr >= 0.0
         pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
         p_y_tgt = F.softmax(y_tgt, dim=1)
         p_y_src = F.softmax(y_src, dim=1)
+        # y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
 
         # START logging
 
         if step is not None:
-            if y is not None:
-                log_idx("Correct probability", p_y_tgt[0], y, step)
-                log_idx("Correct prime", prime, y, step)
-                log_idx("Source Correct Prediction", p_y_src[0], y, step)
-                log_idx("Target Correct Prediction", p_y_tgt[0], y, step)
+            if y_ix is not None:
+                log_idx("Correct probability", p_y_tgt[0], y_ix, step)
+                log_idx("Correct prime", prime, y_ix, step)
+                log_idx("Source Correct Prediction", p_y_src[0], y_ix, step)
+                log_idx("Target Correct Prediction", p_y_tgt[0], y_ix, step)
+                log_idx("Source Unnormalized Correct Prediction", y_src[0], y_ix, step)
+                log_idx("Target Unnormalized Correct Prediction", y_tgt[0], y_ix, step)
 
             log_norm("Target Prediction Norm", p_y_tgt, step)
             log_norm("Target Unnormalized Prediction Norm", y_tgt, step)
@@ -76,6 +85,9 @@ class OverfitTrainer:
 
         # UPDATE
         self.update(new_lr, pseudo_loss)
+        # self.model.prime = torch.nn.Parameter(  # type: ignore
+        #     torch.clamp(self.model.prime, 0, 1)
+        # )
         return y_tgt
 
     def update(self, new_lr, pseudo_loss):
@@ -86,9 +98,9 @@ class OverfitTrainer:
 
     def new_experiment(self, experiment_name="test"):
         mlflow.set_experiment(experiment_name=experiment_name)
-        mlflow.pytorch.log_model(self.model)
+        mlflow.pytorch.log_model(self.model, "overfit")
         mlflow.log_param("weight_decay", self.weight_decay)
-        mlflow.log_param("lr_scale", self.lr_scale)
+        mlflow.log_param("lr_scale", self.max_lr)
         mlflow.log_param("momentum", self.momentum)
 
     def test(self, X: List[torch.Tensor], Y: List[int]):

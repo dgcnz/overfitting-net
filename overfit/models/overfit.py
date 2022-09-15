@@ -5,6 +5,9 @@ from torchvision.models import ResNet152_Weights, resnet152
 
 
 class Overfit(torch.nn.Module):
+    prime: torch.nn.Parameter  # type: ignore
+    num_classes: int
+
     def __init__(
         self,
         pretrained_classifier=resnet152(weights=ResNet152_Weights.IMAGENET1K_V1),
@@ -27,5 +30,5 @@ class Overfit(torch.nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y_src = self.pretrained_classifier(x)
-        y_tgt = y_src + self.prime
+        y_tgt = torch.nn.functional.softmax(y_src, dim=1) + self.prime
         return y_tgt

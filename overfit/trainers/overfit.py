@@ -23,7 +23,6 @@ class OverfitTrainer:
         weight_decay=30,
         max_lr=0.1,
         momentum=0.9,
-        initial_lr=0.05,
     ):
         self.weight_decay = weight_decay
         self.momentum = momentum
@@ -35,7 +34,7 @@ class OverfitTrainer:
 
         self.optimizer = SGD(
             [self.model.prime],
-            lr=initial_lr,
+            lr=0.0,  # doesn't matter as lr will be determined on runtime
             weight_decay=weight_decay,
             momentum=momentum,
         )
@@ -98,9 +97,12 @@ class OverfitTrainer:
 
     def new_experiment(self, experiment_name="test"):
         mlflow.set_experiment(experiment_name=experiment_name)
-        mlflow.pytorch.log_model(self.model, "overfit")
+        mlflow.pytorch.log_model(
+            self.model, artifact_path="overfit", registered_model_name="overfit"
+        )
+
         mlflow.log_param("weight_decay", self.weight_decay)
-        mlflow.log_param("lr_scale", self.max_lr)
+        mlflow.log_param("max_lr", self.max_lr)
         mlflow.log_param("momentum", self.momentum)
 
     def test(self, X: List[torch.Tensor], Y: List[int]):

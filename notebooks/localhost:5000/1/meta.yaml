@@ -1,0 +1,4 @@
+artifact_location: localhost:5000/1
+experiment_id: '1'
+lifecycle_stage: active
+name: test

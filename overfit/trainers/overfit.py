@@ -57,7 +57,8 @@ class OverfitTrainer:
         pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
         p_y_tgt = F.softmax(y_tgt, dim=1)
         p_y_src = F.softmax(y_src, dim=1)
-        # y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
+        p_y_src_ix = torch.argmax(p_y_src, dim=1)
+        p_y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
 
         # START logging
 
@@ -65,14 +66,20 @@ class OverfitTrainer:
             if y_ix is not None:
                 log_idx("Correct probability", p_y_tgt[0], y_ix, step)
                 log_idx("Correct prime", prime, y_ix, step)
-                log_idx("Source Correct Prediction", p_y_src[0], y_ix, step)
-                log_idx("Target Correct Prediction", p_y_tgt[0], y_ix, step)
+                log_idx("Source Normalized Correct Prediction", p_y_src[0], y_ix, step)
+                log_idx("Target Normalized Correct Prediction", p_y_tgt[0], y_ix, step)
                 log_idx("Source Unnormalized Correct Prediction", y_src[0], y_ix, step)
                 log_idx("Target Unnormalized Correct Prediction", y_tgt[0], y_ix, step)
+                log_idx(
+                    "Source Normalized Prediction", p_y_src[0], int(p_y_src_ix), step
+                )
+                log_idx(
+                    "Target Normalized Prediction", p_y_tgt[0], int(p_y_tgt_ix), step
+                )
 
-            log_norm("Target Prediction Norm", p_y_tgt, step)
+            log_norm("Target Normalized Prediction Norm", p_y_tgt, step)
             log_norm("Target Unnormalized Prediction Norm", y_tgt, step)
-            log_max("Target Prediction Max", p_y_tgt, step)
+            log_max("Target Normalized Prediction Max", p_y_tgt, step)
             log_max("Target Unnormalized Prediction Max", y_tgt, step)
             log_max("Source Unnormalized Prediction Max", y_src, step)
             log_metric("Source Prediction Entropy", H_src, step)
@@ -95,17 +102,10 @@ class OverfitTrainer:
         pseudo_loss.backward()
         self.optimizer.step()
 
-    def new_experiment(self, experiment_name="test"):
-        mlflow.set_experiment(experiment_name=experiment_name)
-        mlflow.pytorch.log_model(
-            self.model, artifact_path="overfit", registered_model_name="overfit"
-        )
-
+    def test(self, X: List[torch.Tensor], Y: List[int]):
         mlflow.log_param("weight_decay", self.weight_decay)
         mlflow.log_param("max_lr", self.max_lr)
         mlflow.log_param("momentum", self.momentum)
-
-    def test(self, X: List[torch.Tensor], Y: List[int]):
         n = len(X)
         assert n == len(Y)
         for step, x, y in zip(range(n), X, Y):

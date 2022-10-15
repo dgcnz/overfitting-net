@@ -12,7 +12,6 @@ class Overfit(torch.nn.Module):
         self,
         pretrained_classifier=resnet152(weights=ResNet152_Weights.IMAGENET1K_V1),
         num_classes=1000,
-        confidence=0.1,
     ):
         super().__init__()
         self.pretrained_classifier = pretrained_classifier.eval()
@@ -22,13 +21,10 @@ class Overfit(torch.nn.Module):
         self.prime = torch.nn.Parameter(  # type: ignore
             torch.zeros(self.num_classes), requires_grad=True
         )
-        self.confidence = confidence
 
-    def pseudo_ground_truth(self, y_hat: torch.Tensor) -> torch.Tensor:
-        k = math.e + self.confidence
-        return math.log(k) * y_hat
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y_src = self.pretrained_classifier(x)
-        y_tgt = torch.nn.functional.softmax(y_src, dim=1) + self.prime
+        # y_tgt = torch.nn.functional.softmax(y_src, dim=1) + self.prime
+        y_tgt = y_src + self.prime
         return y_tgt

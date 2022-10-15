@@ -26,7 +26,8 @@ class OverfitTrainer:
     ):
         self.weight_decay = weight_decay
         self.momentum = momentum
-        self.model = Overfit(pretrained_classifier, num_classes, confidence)
+        self.confidence = confidence
+        self.model = Overfit(pretrained_classifier, num_classes)
         self.max_lr = max_lr
         from torch.optim import SGD
 
@@ -39,13 +40,21 @@ class OverfitTrainer:
             momentum=momentum,
         )
 
+    # def pseudo_ground_truth(self, y_hat: torch.Tensor) -> torch.Tensor:
+    #     k = math.e + self.confidence
+    #     return math.log(k) * y_hat
+    def sharpen(self, p, T, dim: int):
+        p_T = torch.pow(p, 1/T)
+        return p_T / torch.sum(p_T, dim=dim, keepdim=True)
+
     def forward_backward(
         self, x: torch.Tensor, y_ix: Optional[int] = None, step: Optional[int] = None
     ) -> torch.Tensor:
         self.optimizer.zero_grad()
         y_src = self.model.pretrained_classifier(x)
         y_tgt = self.model(x)
-        y_pseudo = self.model.pseudo_ground_truth(y_tgt)
+        p_y_tgt = F.softmax(y_tgt, dim=1)
+        y_pseudo = self.sharpen(p_y_tgt, self.confidence, dim=1)
         prime = self.model.prime
 
         # Normalized to )0, 1)
@@ -55,7 +64,6 @@ class OverfitTrainer:
         new_lr = self.max_lr * (1 - H_src)
         assert new_lr >= 0.0
         pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
-        p_y_tgt = F.softmax(y_tgt, dim=1)
         p_y_src = F.softmax(y_src, dim=1)
         p_y_src_ix = torch.argmax(p_y_src, dim=1)
         p_y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
@@ -75,6 +83,16 @@ class OverfitTrainer:
                 )
                 log_idx(
                     "Target Normalized Prediction", p_y_tgt[0], int(p_y_tgt_ix), step
+                )
+
+                def rank(x: torch.Tensor, ix: int):
+                    return (torch.argsort(x, descending=True) == ix).nonzero().item()
+
+                mlflow.log_metric(
+                    "Target Correct Rank", rank(p_y_tgt[0], y_ix),  step
+                )
+                mlflow.log_metric(
+                    "Source Correct Rank", rank(p_y_src[0], y_ix), step
                 )
 
             log_norm("Target Normalized Prediction Norm", p_y_tgt, step)
@@ -106,6 +124,7 @@ class OverfitTrainer:
         mlflow.log_param("weight_decay", self.weight_decay)
         mlflow.log_param("max_lr", self.max_lr)
         mlflow.log_param("momentum", self.momentum)
+        mlflow.log_param("confidence", self.confidence)
         n = len(X)
         assert n == len(Y)
         for step, x, y in zip(range(n), X, Y):

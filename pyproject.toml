@@ -15,11 +15,8 @@ numpy = "^1.23.0"
 tqdm = "^4.64.0"
 tensorboard = "^2.9.1"
 ipympl = "^0.9.1"
+av = "^9.2.0"
 
-[tool.poetry.dev-dependencies]
-flake8 = "^4.0.1"
-black = "^22.6.0"
-isort = "^5.10.1"
 
 [tool.poetry.group.dev.dependencies]
 mlflow = "^1.27.0"

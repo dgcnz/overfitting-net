@@ -1,0 +1,16 @@
+artifact_path: overfitmodel
+flavors:
+  python_function:
+    data: data
+    env: conda.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.10.6
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 1.12.1+cu102
+mlflow_version: 1.29.0
+model_uuid: d298c89503e74bb1a9e21ba7b590e935
+run_id: 18a064123c244a259b6f6277ef7f10cb
+utc_time_created: '2022-10-09 18:48:01.632942'

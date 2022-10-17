@@ -1,0 +1,250 @@
+[1] skunk
+[2] skunk
+[3] Arctic fox
+[4] Angora
+[5] Angora
+[6] Angora
+[7] Samoyed
+[8] Samoyed
+[9] Samoyed
+[10] Samoyed
+[11] Samoyed
+[12] Samoyed
+[13] Samoyed
+[14] Samoyed
+[15] Samoyed
+[16] Samoyed
+[17] Samoyed
+[18] Samoyed
+[19] Samoyed
+[20] Samoyed
+[21] Samoyed
+[22] Samoyed
+[23] Samoyed
+[24] Samoyed
+[25] giant panda
+[26] red wolf
+[27] red wolf
+[28] red wolf
+[29] red wolf
+[30] red wolf
+[31] red wolf
+[32] red wolf
+[33] American egret
+[34] dhole
+[35] dhole
+[36] American egret
+[37] red wolf
+[38] dhole
+[39] dhole
+[40] red wolf
+[41] dhole
+[42] red wolf
+[43] dhole
+[44] red wolf
+[45] dhole
+[46] red wolf
+[47] red wolf
+[48] red wolf
+[49] red wolf
+[50] red wolf
+[51] coyote
+[52] dhole
+[53] coyote
+[54] wallaby
+[55] American egret
+[56] American egret
+[57] American egret
+[58] dhole
+[59] dhole
+[60] dhole
+[61] wallaby
+[62] dhole
+[63] wallaby
+[64] dhole
+[65] wallaby
+[66] wallaby
+[67] wallaby
+[68] wallaby
+[69] wallaby
+[70] wallaby
+[71] wallaby
+[72] wallaby
+[73] Samoyed
+[74] Samoyed
+[75] Samoyed
+[76] Angora
+[77] Angora
+[78] Samoyed
+[79] Samoyed
+[80] Samoyed
+[81] Samoyed
+[82] Samoyed
+[83] Samoyed
+[84] Samoyed
+[85] Samoyed
+[86] Samoyed
+[87] Samoyed
+[88] Samoyed
+[89] Samoyed
+[90] Samoyed
+[91] Samoyed
+[92] Samoyed
+[93] Samoyed
+[94] Samoyed
+[95] Samoyed
+[96] Samoyed
+[97] Samoyed
+[98] Samoyed
+[99] Samoyed
+[100] Samoyed
+[101] Samoyed
+[102] Samoyed
+[103] Samoyed
+[104] Samoyed
+[105] Samoyed
+[106] Samoyed
+[107] Samoyed
+[108] Samoyed
+[109] Samoyed
+[110] Samoyed
+[111] Samoyed
+[112] Samoyed
+[113] Samoyed
+[114] Samoyed
+[115] Samoyed
+[116] Samoyed
+[117] Samoyed
+[118] Samoyed
+[119] Samoyed
+[120] Samoyed
+[121] Samoyed
+[122] Samoyed
+[123] Samoyed
+[124] Samoyed
+[125] Samoyed
+[126] Samoyed
+[127] Samoyed
+[128] Samoyed
+[129] Samoyed
+[130] Samoyed
+[131] Samoyed
+[132] Samoyed
+[133] Samoyed
+[134] Samoyed
+[135] Samoyed
+[136] Samoyed
+[137] Samoyed
+[138] Samoyed
+[139] Samoyed
+[140] Samoyed
+[141] Samoyed
+[142] Samoyed
+[143] Samoyed
+[144] Samoyed
+[145] Samoyed
+[146] Samoyed
+[147] Samoyed
+[148] Samoyed
+[149] Samoyed
+[150] hare
+[151] Samoyed
+[152] Samoyed
+[153] Samoyed
+[154] Samoyed
+[155] Samoyed
+[156] Samoyed
+[157] Samoyed
+[158] Samoyed
+[159] Samoyed
+[160] Samoyed
+[161] Samoyed
+[162] Samoyed
+[163] Samoyed
+[164] Samoyed
+[165] Samoyed
+[166] Samoyed
+[167] Samoyed
+[168] Samoyed
+[169] Samoyed
+[170] Samoyed
+[171] Samoyed
+[172] Samoyed
+[173] Samoyed
+[174] Samoyed
+[175] Samoyed
+[176] Samoyed
+[177] Samoyed
+[178] Samoyed
+[179] Samoyed
+[180] Samoyed
+[181] Samoyed
+[182] Samoyed
+[183] Samoyed
+[184] Samoyed
+[185] Samoyed
+[186] Samoyed
+[187] Samoyed
+[188] Samoyed
+[189] Samoyed
+[190] Samoyed
+[191] Samoyed
+[192] Samoyed
+[193] Samoyed
+[194] Samoyed
+[195] Samoyed
+[196] Samoyed
+[197] Samoyed
+[198] Samoyed
+[199] Samoyed
+[200] Samoyed
+[201] Samoyed
+[202] crane
+[203] Samoyed
+[204] American egret
+[205] Samoyed
+[206] Samoyed
+[207] Samoyed
+[208] Samoyed
+[209] Samoyed
+[210] Samoyed
+[211] Samoyed
+[212] Samoyed
+[213] Samoyed
+[214] Samoyed
+[215] Samoyed
+[216] Samoyed
+[217] Samoyed
+[218] Samoyed
+[219] Samoyed
+[220] Samoyed
+[221] Samoyed
+[222] Samoyed
+[223] Samoyed
+[224] Samoyed
+[225] Samoyed
+[226] Samoyed
+[227] Samoyed
+[228] Samoyed
+[229] Samoyed
+[230] Samoyed
+[231] Samoyed
+[232] Samoyed
+[233] Samoyed
+[234] Samoyed
+[235] Samoyed
+[236] Samoyed
+[237] Samoyed
+[238] Samoyed
+[239] Samoyed
+[240] Samoyed
+[241] Samoyed
+[242] Samoyed
+[243] Samoyed
+[244] Samoyed
+[245] Samoyed
+[246] Samoyed
+[247] Samoyed
+[248] Samoyed
+[249] Samoyed
+[250] Samoyed

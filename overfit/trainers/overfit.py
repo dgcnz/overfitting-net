@@ -1,5 +1,6 @@
 import math
 from typing import List, Optional
+from tqdm import tqdm
 
 import mlflow
 import torch
@@ -54,7 +55,7 @@ class OverfitTrainer:
         y_src = self.model.pretrained_classifier(x)
         y_tgt = self.model(x)
         p_y_tgt = F.softmax(y_tgt, dim=1)
-        y_pseudo = self.sharpen(p_y_tgt, self.confidence, dim=1)
+        y_pseudo = self.sharpen(p_y_tgt, 1 - self.confidence, dim=1)
         prime = self.model.prime
 
         # Normalized to )0, 1)
@@ -120,12 +121,23 @@ class OverfitTrainer:
         pseudo_loss.backward()
         self.optimizer.step()
 
-    def test(self, X: List[torch.Tensor], Y: List[int]):
+    def test(self, X: List[torch.Tensor], Y: List[int], categories: List[str]):
         mlflow.log_param("weight_decay", self.weight_decay)
         mlflow.log_param("max_lr", self.max_lr)
         mlflow.log_param("momentum", self.momentum)
         mlflow.log_param("confidence", self.confidence)
         n = len(X)
         assert n == len(Y)
-        for step, x, y in zip(range(n), X, Y):
-            self.forward_backward(x, y, step)
+
+        tgt_preds_txt = ""
+        src_preds_txt = ""
+        for step, x, y in tqdm(list(zip(range(n), X, Y))):
+            tgt_pred = self.forward_backward(x, y, step)
+            src_pred = self.model.pretrained_classifier.forward(x)
+            tgt_cat = categories[tgt_pred[0].argmax().item()]
+            src_cat = categories[src_pred[0].argmax().item()]
+            tgt_preds_txt += f"[{step + 1}] {tgt_cat}\n"
+            src_preds_txt += f"[{step + 1}] {src_cat}\n"
+        mlflow.log_text(tgt_preds_txt, "target_predictions.txt")
+        mlflow.log_text(src_preds_txt, "source_predictions.txt")
+

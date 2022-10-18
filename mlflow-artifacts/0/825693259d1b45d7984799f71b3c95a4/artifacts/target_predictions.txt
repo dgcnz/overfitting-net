@@ -1,0 +1,236 @@
+[1] white wolf
+[2] white wolf
+[3] Eskimo dog
+[4] white wolf
+[5] white wolf
+[6] Samoyed
+[7] Samoyed
+[8] Samoyed
+[9] Samoyed
+[10] Samoyed
+[11] Samoyed
+[12] Samoyed
+[13] Samoyed
+[14] Samoyed
+[15] Samoyed
+[16] Samoyed
+[17] Samoyed
+[18] Samoyed
+[19] Samoyed
+[20] Samoyed
+[21] Samoyed
+[22] Samoyed
+[23] Samoyed
+[24] Samoyed
+[25] Samoyed
+[26] Samoyed
+[27] white wolf
+[28] white wolf
+[29] white wolf
+[30] white wolf
+[31] white wolf
+[32] white wolf
+[33] white wolf
+[34] white wolf
+[35] white wolf
+[36] white wolf
+[37] white wolf
+[38] white wolf
+[39] white wolf
+[40] white wolf
+[41] white wolf
+[42] white wolf
+[43] white wolf
+[44] white wolf
+[45] white wolf
+[46] white wolf
+[47] white wolf
+[48] white wolf
+[49] white wolf
+[50] white wolf
+[51] white wolf
+[52] white wolf
+[53] white wolf
+[54] white wolf
+[55] red wolf
+[56] white wolf
+[57] red wolf
+[58] red wolf
+[59] red wolf
+[60] coyote
+[61] coyote
+[62] coyote
+[63] coyote
+[64] coyote
+[65] coyote
+[66] coyote
+[67] coyote
+[68] coyote
+[69] coyote
+[70] coyote
+[71] coyote
+[72] coyote
+[73] coyote
+[74] coyote
+[75] coyote
+[76] coyote
+[77] coyote
+[78] coyote
+[79] wallaby
+[80] skunk
+[81] skunk
+[82] skunk
+[83] Angora
+[84] Angora
+[85] Angora
+[86] Angora
+[87] Angora
+[88] Angora
+[89] Angora
+[90] Angora
+[91] Angora
+[92] Angora
+[93] Angora
+[94] Angora
+[95] Angora
+[96] Angora
+[97] Angora
+[98] Angora
+[99] Samoyed
+[100] Samoyed
+[101] Samoyed
+[102] Samoyed
+[103] Samoyed
+[104] Samoyed
+[105] Samoyed
+[106] Samoyed
+[107] Samoyed
+[108] Samoyed
+[109] Samoyed
+[110] Samoyed
+[111] Samoyed
+[112] Samoyed
+[113] Samoyed
+[114] Samoyed
+[115] Samoyed
+[116] Samoyed
+[117] Samoyed
+[118] Samoyed
+[119] Samoyed
+[120] Samoyed
+[121] Samoyed
+[122] Samoyed
+[123] Samoyed
+[124] Samoyed
+[125] Samoyed
+[126] Samoyed
+[127] Samoyed
+[128] Samoyed
+[129] Samoyed
+[130] Samoyed
+[131] Samoyed
+[132] Samoyed
+[133] Samoyed
+[134] Samoyed
+[135] Samoyed
+[136] Samoyed
+[137] Samoyed
+[138] Samoyed
+[139] Samoyed
+[140] Samoyed
+[141] Samoyed
+[142] Samoyed
+[143] Samoyed
+[144] Samoyed
+[145] Samoyed
+[146] Samoyed
+[147] Samoyed
+[148] Samoyed
+[149] Samoyed
+[150] Samoyed
+[151] Samoyed
+[152] Samoyed
+[153] Samoyed
+[154] Samoyed
+[155] Samoyed
+[156] Samoyed
+[157] Samoyed
+[158] Samoyed
+[159] Samoyed
+[160] Samoyed
+[161] Samoyed
+[162] Samoyed
+[163] Samoyed
+[164] Samoyed
+[165] Samoyed
+[166] Samoyed
+[167] Samoyed
+[168] Samoyed
+[169] skunk
+[170] Samoyed
+[171] Samoyed
+[172] Samoyed
+[173] Samoyed
+[174] Samoyed
+[175] skunk
+[176] skunk
+[177] skunk
+[178] Samoyed
+[179] Samoyed
+[180] Samoyed
+[181] Samoyed
+[182] Samoyed
+[183] Samoyed
+[184] Samoyed
+[185] Angora
+[186] Samoyed
+[187] Samoyed
+[188] Angora
+[189] Angora
+[190] Angora
+[191] Angora
+[192] Angora
+[193] Angora
+[194] Angora
+[195] Angora
+[196] Angora
+[197] Angora
+[198] Angora
+[199] Angora
+[200] Angora
+[201] Angora
+[202] Angora
+[203] Angora
+[204] Angora
+[205] Angora
+[206] Angora
+[207] Angora
+[208] Angora
+[209] Angora
+[210] Angora
+[211] Angora
+[212] Angora
+[213] Angora
+[214] Angora
+[215] Angora
+[216] Angora
+[217] Angora
+[218] Angora
+[219] Angora
+[220] Angora
+[221] Angora
+[222] Angora
+[223] Angora
+[224] Angora
+[225] Angora
+[226] Angora
+[227] Angora
+[228] Angora
+[229] West Highland white terrier
+[230] Angora
+[231] West Highland white terrier
+[232] West Highland white terrier
+[233] West Highland white terrier
+[234] American egret
+[235] West Highland white terrier
+[236] crane

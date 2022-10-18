@@ -19,6 +19,7 @@ parser.add_argument("--crop_fraction", type=int, help="Crop fraction", default=3
 parser.add_argument("--max_length", type=int, help="Max length", default=100)
 parser.add_argument("--confidence", type=float, help="Confidence", default=0.5)
 parser.add_argument("--weight_decay", type=float, help="Weight Decay", default=0.9)
+parser.add_argument("--max_lr", type=float, help="Max Learning rate", default=0.1)
 parser.add_argument("--momentum", type=float, help="Momentum", default=0.9)
 
 args = parser.parse_args()
@@ -26,6 +27,7 @@ args = parser.parse_args()
 
 def normalize_rgb(img):
     return FT.normalize(img, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
 
 logging.info("Creating image")
 input_image = Image.open("dog.jpg")
@@ -46,7 +48,7 @@ tgtnet_trainer.set(
     num_classes=1000,
     confidence=args.confidence,
     weight_decay=args.weight_decay,
-    max_lr=0.1,
+    max_lr=args.max_lr,
     momentum=args.momentum,
 )
 
@@ -62,6 +64,5 @@ with mlflow.start_run(experiment_id="0") as run:
     mlflow.log_param("Frames", len(input_video))
     with open("imagenet_classes.txt", "r") as f:
         categories = f.readlines()
-        categories = [cat.rstrip('\n') for cat in categories]
+        categories = [cat.rstrip("\n") for cat in categories]
         tgtnet_trainer.test(input_video, [258] * len(input_video), categories)
-

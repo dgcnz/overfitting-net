@@ -3,9 +3,9 @@ import logging
 import os
 from pathlib import Path
 
-import torch
 import torchvision.transforms.functional as FT
-from overfit.utils.img2vid import zigzag
+from overfit.utils.img2vid import float32_to_uint8, zigzag
+from overfit.utils.misc import floor_even
 from PIL import Image
 from torchvision.io.video import write_video
 
@@ -19,21 +19,15 @@ def generate_video(img_path: str, crop_fraction: int, max_length: int) -> str:
     input_tensor = FT.to_tensor(input_image)
     _, h, w = input_tensor.size()
 
-    crop_fraction = crop_fraction
-    hcrop = h // crop_fraction
-    wcrop = w // crop_fraction
-    hcrop = (hcrop // 2) * 2
-    wcrop = (wcrop // 2) * 2
-    input_video = zigzag(input_tensor, hcrop, wcrop, max_length)
-    video_tensor = torch.stack(input_video)
-    video_tensor = video_tensor.permute(0, 2, 3, 1).type(torch.uint8)
-    logging.info(video_tensor.shape)
-    logging.info(video_tensor.dtype)
+    hcrop = floor_even(h // crop_fraction)
+    wcrop = floor_even(w // crop_fraction)
+    video_tensor = zigzag(input_tensor, hcrop, wcrop, max_length)
+    video_tensor = float32_to_uint8(video_tensor.permute(0, 2, 3, 1))
     image_filename = Path(img_path).stem
     video_dir = VIDEO_OUT_PATH / image_filename
     video_dir.mkdir(parents=True, exist_ok=True)
-    out_name = video_dir / f"{crop_fraction}-{len(input_video)}.mp4"
-    write_video(filename=str(out_name), video_array=video_tensor, fps=1)
+    out_name = video_dir / f"{crop_fraction}-{len(video_tensor)}.mp4"
+    write_video(filename=str(out_name), video_array=video_tensor, fps=20)
     return str(out_name)
 
 

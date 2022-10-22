@@ -1,12 +1,14 @@
-from typing import List
-
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+import torch
 import torchvision.transforms.functional as FT
 from torch import Tensor
 
 
-def zigzag(img: Tensor, hcrop, wcrop, maxlen=100) -> List[Tensor]:
+def zigzag(img: Tensor, hcrop, wcrop, maxlen=100) -> Tensor:
+    """
+    output (T, C, H, W)
+    """
     _, h, w = img.size()
     k = h // hcrop
     wstep = w // (maxlen // k)
@@ -21,10 +23,10 @@ def zigzag(img: Tensor, hcrop, wcrop, maxlen=100) -> List[Tensor]:
             row_vid.reverse()
         vid.extend(row_vid)
 
-    return vid
+    return torch.stack(vid)
 
 
-def display_video(vid: List[Tensor]):
+def display_video(vid: Tensor):
     fig, ax = plt.subplots()
     frames = []
     for ix, img in enumerate(vid):
@@ -39,3 +41,11 @@ def display_video(vid: List[Tensor]):
         blit=True,
         repeat_delay=1000,
     )
+
+
+def float32_to_uint8(tensor: Tensor) -> Tensor:
+    return (255 * tensor).type(torch.uint8)
+
+
+def uint8_to_float32(tensor: Tensor) -> Tensor:
+    return (tensor / 255.0).type(torch.float32)

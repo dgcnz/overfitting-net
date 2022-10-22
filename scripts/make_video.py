@@ -1,16 +1,14 @@
+import argparse
 import urllib
-from overfit.utils.img2vid import display_video
 import urllib.request
 
 import torchvision.transforms.functional as FT
-from overfit.utils.img2vid import zigzag
-import matplotlib.pyplot as plt
+from overfit.utils.img2vid import display_video, zigzag
 from PIL import Image
-import argparse
 
 parser = argparse.ArgumentParser(description="")
-parser.add_argument("crop_fraction", type=int, help="Crop fraction")
-parser.add_argument("max_length", type=int, help="Max length")
+parser.add_argument("--crop_fraction", type=int, help="Crop fraction")
+parser.add_argument("--max_length", type=int, help="Max length")
 
 args = parser.parse_args()
 

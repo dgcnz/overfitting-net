@@ -1,12 +1,12 @@
 import math
 from typing import List, Optional
-from tqdm import tqdm
 
 import mlflow
 import torch
 import torch.nn.functional as F
 from mlflow import log_metric
 from torchvision.models import ResNet152_Weights, resnet152
+from tqdm import tqdm
 
 from overfit.models.overfit import Overfit
 from overfit.utils.mlflow import log_idx, log_max, log_norm
@@ -45,7 +45,7 @@ class OverfitTrainer:
     #     k = math.e + self.confidence
     #     return math.log(k) * y_hat
     def sharpen(self, p, T, dim: int):
-        p_T = torch.pow(p, 1/T)
+        p_T = torch.pow(p, 1 / T)
         return p_T / torch.sum(p_T, dim=dim, keepdim=True)
 
     def forward_backward(
@@ -89,12 +89,8 @@ class OverfitTrainer:
                 def rank(x: torch.Tensor, ix: int):
                     return (torch.argsort(x, descending=True) == ix).nonzero().item()
 
-                mlflow.log_metric(
-                    "Target Correct Rank", rank(p_y_tgt[0], y_ix),  step
-                )
-                mlflow.log_metric(
-                    "Source Correct Rank", rank(p_y_src[0], y_ix), step
-                )
+                mlflow.log_metric("Target Correct Rank", rank(p_y_tgt[0], y_ix), step)
+                mlflow.log_metric("Source Correct Rank", rank(p_y_src[0], y_ix), step)
 
             log_norm("Target Normalized Prediction Norm", p_y_tgt, step)
             log_norm("Target Unnormalized Prediction Norm", y_tgt, step)
@@ -134,10 +130,9 @@ class OverfitTrainer:
         for step, x, y in tqdm(list(zip(range(n), X, Y))):
             tgt_pred = self.forward_backward(x, y, step)
             src_pred = self.model.pretrained_classifier.forward(x)
-            tgt_cat = categories[tgt_pred[0].argmax().item()]
-            src_cat = categories[src_pred[0].argmax().item()]
+            tgt_cat = categories[tgt_pred[0].argmax().item()]  # type: ignore
+            src_cat = categories[src_pred[0].argmax().item()]  # type: ignore
             tgt_preds_txt += f"[{step + 1}] {tgt_cat}\n"
             src_preds_txt += f"[{step + 1}] {src_cat}\n"
         mlflow.log_text(tgt_preds_txt, "target_predictions.txt")
         mlflow.log_text(src_preds_txt, "source_predictions.txt")
-

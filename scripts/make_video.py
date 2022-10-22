@@ -3,7 +3,7 @@ import urllib
 import urllib.request
 
 import torchvision.transforms.functional as FT
-from overfit.utils.img2vid import display_video, zigzag
+from overfit.utils.io import display_video, zigzag
 from PIL import Image
 
 parser = argparse.ArgumentParser(description="")

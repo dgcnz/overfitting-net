@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 import torchvision.transforms.functional as FT
-from overfit.utils.img2vid import float32_to_uint8, zigzag
+from overfit.utils.io import float32_to_uint8, zigzag
 from overfit.utils.misc import floor_even
 from PIL import Image
 from torchvision.io.video import write_video

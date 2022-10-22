@@ -117,17 +117,20 @@ class OverfitTrainer:
         pseudo_loss.backward()
         self.optimizer.step()
 
-    def test(self, X: List[torch.Tensor], Y: List[int], categories: List[str]):
+    def test(self, X: torch.Tensor, Y: List[int], categories: List[str]):
+        """
+        X: video tensor on (T, C, H, W) format
+        """
         mlflow.log_param("weight_decay", self.weight_decay)
         mlflow.log_param("max_lr", self.max_lr)
         mlflow.log_param("momentum", self.momentum)
         mlflow.log_param("confidence", self.confidence)
-        n = len(X)
-        assert n == len(Y)
+        assert len(X) == len(Y)
 
         tgt_preds_txt = ""
         src_preds_txt = ""
-        for step, x, y in tqdm(list(zip(range(n), X, Y))):
+        for step, x, y in tqdm(list(zip(range(len(X)), X, Y))):
+            x = x.unsqueeze(0)
             tgt_pred = self.forward_backward(x, y, step)
             src_pred = self.model.pretrained_classifier.forward(x)
             tgt_cat = categories[tgt_pred[0].argmax().item()]  # type: ignore

@@ -5,11 +5,11 @@ import os
 import mlflow
 from overfit.trainers.overfit import OverfitTrainer
 from overfit.utils.io import normalize_rgb, uint8_to_float32
-from overfit.utils.misc import parse_video_filename_params
+from overfit.utils.misc import parse_video_path_params
 from torchvision.io import read_video
 from torchvision.models import ResNet34_Weights, resnet34
 
-MLFLOW_SERVER = os.environ["MLFLOW_SERVER"]
+MLFLOW_HOST = os.environ["MLFLOW_SERVER"]
 
 logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description="")
@@ -24,7 +24,7 @@ args = parser.parse_args()
 vid = read_video(args.video_path, output_format="TCHW")[0]
 vid = uint8_to_float32(vid)
 vid = normalize_rgb(vid)
-crop_fraction, n_frames = parse_video_filename_params(args.video_path)
+y_ix, _, crop_fraction, n_frames = parse_video_path_params(args.video_path)
 logging.info(crop_fraction)
 logging.info(n_frames)
 assert len(vid) == int(n_frames)
@@ -43,11 +43,11 @@ tgtnet_trainer.set(
 
 
 logging.info("Starting experiment")
-mlflow.set_tracking_uri(f"http://{MLFLOW_SERVER}:5050")
+mlflow.set_tracking_uri(f"http://{MLFLOW_HOST}:5050")
 with mlflow.start_run(experiment_id="0") as run:
     mlflow.log_param("Crop fraction", crop_fraction)
     mlflow.log_param("Frames", n_frames)
     with open("imagenet_classes.txt", "r") as f:
         categories = f.readlines()
         categories = [cat.rstrip("\n") for cat in categories]
-        tgtnet_trainer.test(vid, [258] * n_frames, categories)
+        tgtnet_trainer.test(vid, [y_ix] * n_frames, categories)

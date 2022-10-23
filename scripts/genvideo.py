@@ -9,7 +9,8 @@ from overfit.utils.misc import floor_even
 from PIL import Image
 from torchvision.io.video import write_video
 
-VIDEO_OUT_PATH = Path(os.getenv("VIDEO_OUT_PATH", "data/videos"))
+VIDEO_OUT_PATH = Path(os.getenv("VIDEO_OUT_PATH", "data/video"))
+VIDEO_OUT_PATH.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -24,9 +25,9 @@ def generate_video(img_path: str, crop_fraction: int, max_length: int) -> str:
     video_tensor = zigzag(input_tensor, hcrop, wcrop, max_length)
     video_tensor = float32_to_uint8(video_tensor.permute(0, 2, 3, 1))
     image_filename = Path(img_path).stem
-    video_dir = VIDEO_OUT_PATH / image_filename
-    video_dir.mkdir(parents=True, exist_ok=True)
-    out_name = video_dir / f"{crop_fraction}-{len(video_tensor)}.mp4"
+    out_name = (
+        VIDEO_OUT_PATH / f"{image_filename}-{crop_fraction}-{len(video_tensor)}.mp4"
+    )
     write_video(filename=str(out_name), video_array=video_tensor, fps=20)
     return str(out_name)
 

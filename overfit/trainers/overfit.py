@@ -1,14 +1,15 @@
-import math
 from typing import List, Optional
 
 import mlflow
 import torch
 import torch.nn.functional as F
 from mlflow import log_metric
+from torch.optim import SGD
 from torchvision.models import ResNet152_Weights, resnet152
 from tqdm import tqdm
 
 from overfit.models.overfit import Overfit
+from overfit.utils.misc import entropy, rank, sharpen
 from overfit.utils.mlflow import log_idx, log_max, log_norm
 
 
@@ -30,7 +31,6 @@ class OverfitTrainer:
         self.confidence = confidence
         self.model = Overfit(pretrained_classifier, num_classes)
         self.max_lr = max_lr
-        from torch.optim import SGD
 
         # from overfit.optimizers.sgdmod import SGDMod
 
@@ -41,74 +41,75 @@ class OverfitTrainer:
             momentum=momentum,
         )
 
-    # def pseudo_ground_truth(self, y_hat: torch.Tensor) -> torch.Tensor:
-    #     k = math.e + self.confidence
-    #     return math.log(k) * y_hat
-    def sharpen(self, p, T, dim: int):
-        p_T = torch.pow(p, 1 / T)
-        return p_T / torch.sum(p_T, dim=dim, keepdim=True)
+    def log_metrics(
+        self,
+        step: int,
+        y_ix: int,
+        p_y_src: torch.Tensor,
+        p_y_tgt: torch.Tensor,
+        y_src: torch.Tensor,
+        y_tgt: torch.Tensor,
+        prime: torch.Tensor,
+        H_src: float,
+        new_lr: float,
+    ) -> None:
+        """Log metrics to mlflow."""
+
+        p_y_src_ix = torch.argmax(p_y_src, dim=1)
+        p_y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
+        log_idx("Correct probability", p_y_tgt[0], y_ix, step)
+        log_idx("Correct prime", prime, y_ix, step)
+        log_idx("Source Normalized Correct Prediction", p_y_src[0], y_ix, step)
+        log_idx("Target Normalized Correct Prediction", p_y_tgt[0], y_ix, step)
+        log_idx("Source Unnormalized Correct Prediction", y_src[0], y_ix, step)
+        log_idx("Target Unnormalized Correct Prediction", y_tgt[0], y_ix, step)
+        log_idx("Source Normalized Prediction", p_y_src[0], int(p_y_src_ix), step)
+        log_idx("Target Normalized Prediction", p_y_tgt[0], int(p_y_tgt_ix), step)
+
+        mlflow.log_metric("Target Correct Rank", rank(p_y_tgt[0], y_ix), step)
+        mlflow.log_metric("Source Correct Rank", rank(p_y_src[0], y_ix), step)
+
+        log_norm("Target Normalized Prediction Norm", p_y_tgt, step)
+        log_norm("Target Unnormalized Prediction Norm", y_tgt, step)
+        log_max("Target Normalized Prediction Max", p_y_tgt, step)
+        log_max("Target Unnormalized Prediction Max", y_tgt, step)
+        log_max("Source Unnormalized Prediction Max", y_src, step)
+        log_metric("Source Prediction Entropy", H_src, step)
+        log_metric("Learning Rate", new_lr, step)
+        log_norm("Prime Norm", prime, step)
+        log_max("Prime Max", prime, step)
 
     def forward_backward(
         self, x: torch.Tensor, y_ix: Optional[int] = None, step: Optional[int] = None
     ) -> torch.Tensor:
+        assert x.shape[0] == 1  # don't handle batched processing
         self.optimizer.zero_grad()
         y_src = self.model.pretrained_classifier(x)
         y_tgt = self.model(x)
-        p_y_tgt = F.softmax(y_tgt, dim=1)
-        y_pseudo = self.sharpen(p_y_tgt, 1 - self.confidence, dim=1)
-        prime = self.model.prime
-
-        # Normalized to )0, 1)
-        H_src = torch.distributions.Categorical(logits=y_src).entropy()[0] / math.log(
-            self.model.num_classes
-        )
-        new_lr = self.max_lr * (1 - H_src)
-        assert new_lr >= 0.0
-        pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
         p_y_src = F.softmax(y_src, dim=1)
-        p_y_src_ix = torch.argmax(p_y_src, dim=1)
-        p_y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
+        p_y_tgt = F.softmax(y_tgt, dim=1)
+        y_pseudo = sharpen(p_y_tgt, 1 - self.confidence, dim=1)
+        pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
 
-        # START logging
+        H_src = entropy(logits=y_src)[0].item()
+        new_lr = self.max_lr * (1 - H_src)
+        assert 0.0 <= H_src and H_src <= 1.0
+        assert new_lr >= 0.0
 
-        if step is not None:
-            if y_ix is not None:
-                log_idx("Correct probability", p_y_tgt[0], y_ix, step)
-                log_idx("Correct prime", prime, y_ix, step)
-                log_idx("Source Normalized Correct Prediction", p_y_src[0], y_ix, step)
-                log_idx("Target Normalized Correct Prediction", p_y_tgt[0], y_ix, step)
-                log_idx("Source Unnormalized Correct Prediction", y_src[0], y_ix, step)
-                log_idx("Target Unnormalized Correct Prediction", y_tgt[0], y_ix, step)
-                log_idx(
-                    "Source Normalized Prediction", p_y_src[0], int(p_y_src_ix), step
-                )
-                log_idx(
-                    "Target Normalized Prediction", p_y_tgt[0], int(p_y_tgt_ix), step
-                )
+        if y_ix is not None and step is not None:
+            self.log_metrics(
+                step=step,
+                y_ix=y_ix,
+                p_y_src=p_y_src,
+                p_y_tgt=p_y_tgt,
+                y_src=y_src,
+                y_tgt=y_tgt,
+                prime=self.model.prime,
+                new_lr=new_lr,
+                H_src=H_src,
+            )
 
-                def rank(x: torch.Tensor, ix: int):
-                    return (torch.argsort(x, descending=True) == ix).nonzero().item()
-
-                mlflow.log_metric("Target Correct Rank", rank(p_y_tgt[0], y_ix), step)
-                mlflow.log_metric("Source Correct Rank", rank(p_y_src[0], y_ix), step)
-
-            log_norm("Target Normalized Prediction Norm", p_y_tgt, step)
-            log_norm("Target Unnormalized Prediction Norm", y_tgt, step)
-            log_max("Target Normalized Prediction Max", p_y_tgt, step)
-            log_max("Target Unnormalized Prediction Max", y_tgt, step)
-            log_max("Source Unnormalized Prediction Max", y_src, step)
-            log_metric("Source Prediction Entropy", H_src, step)
-            log_metric("Learning Rate", new_lr, step)
-            log_norm("Prime Norm", prime, step)
-            log_max("Prime Max", prime, step)
-
-        # END logging
-
-        # UPDATE
         self.update(new_lr, pseudo_loss)
-        # self.model.prime = torch.nn.Parameter(  # type: ignore
-        #     torch.clamp(self.model.prime, 0, 1)
-        # )
         return y_tgt
 
     def update(self, new_lr, pseudo_loss):

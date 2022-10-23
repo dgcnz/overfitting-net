@@ -110,3 +110,6 @@ datasets/
 .idea/
 __MACOSX/
 **/.DS_Store
+mlruns/
+mlflow-artifacts/
+notebooks/mlruns

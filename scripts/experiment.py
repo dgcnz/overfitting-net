@@ -31,7 +31,12 @@ assert len(vid) == int(n_frames)
 
 logging.info("Creating trainer")
 srcnet = resnet34(weights=ResNet34_Weights.IMAGENET1K_V1).eval()
-tgtnet_trainer = OverfitTrainer()
+
+with open("imagenet_classes.txt", "r") as f:
+    categories = f.readlines()
+    categories = [cat.rstrip("\n") for cat in categories]
+
+tgtnet_trainer = OverfitTrainer(categories=categories)
 tgtnet_trainer.set(
     pretrained_classifier=srcnet,
     num_classes=1000,
@@ -47,7 +52,4 @@ mlflow.set_tracking_uri(f"http://{MLFLOW_HOST}:5050")
 with mlflow.start_run(experiment_id="0") as run:
     mlflow.log_param("Crop fraction", crop_fraction)
     mlflow.log_param("Frames", n_frames)
-    with open("imagenet_classes.txt", "r") as f:
-        categories = f.readlines()
-        categories = [cat.rstrip("\n") for cat in categories]
-        tgtnet_trainer.test(vid, [y_ix] * n_frames, categories)
+    tgtnet_trainer.test(vid, [y_ix] * n_frames, active_run=run)

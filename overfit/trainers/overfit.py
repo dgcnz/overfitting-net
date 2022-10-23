@@ -1,21 +1,29 @@
+import logging
+import time
 from typing import List, Optional
 
 import mlflow
 import torch
 import torch.nn.functional as F
-from mlflow import log_metric
+from mlflow.entities import Metric
+from mlflow.tracking import MlflowClient
 from torch.optim import SGD
 from torchvision.models import ResNet152_Weights, resnet152
 from tqdm import tqdm
 
 from overfit.models.overfit import Overfit
-from overfit.utils.misc import entropy, rank, sharpen
-from overfit.utils.mlflow import log_idx, log_max, log_norm
+from overfit.utils.misc import batch, entropy, rank, sharpen
+from overfit.utils.mlflow import get_log_idx, get_log_max, get_log_norm
 
 
 class OverfitTrainer:
-    def __init__(self):
-        pass
+    categories: List[str]
+    metric_history: List[Metric] = []
+    tgt_preds_txt: str = ""
+    src_preds_txt: str = ""
+
+    def __init__(self, categories: List[str]):
+        self.categories = categories
 
     def set(
         self,
@@ -31,9 +39,6 @@ class OverfitTrainer:
         self.confidence = confidence
         self.model = Overfit(pretrained_classifier, num_classes)
         self.max_lr = max_lr
-
-        # from overfit.optimizers.sgdmod import SGDMod
-
         self.optimizer = SGD(
             [self.model.prime],
             lr=0.0,  # doesn't matter as lr will be determined on runtime
@@ -41,9 +46,22 @@ class OverfitTrainer:
             momentum=momentum,
         )
 
+    def reset_logs_history(self):
+        self.metric_history.clear()
+        self.src_preds_txt = ""
+        self.tgt_preds_txt = ""
+
+    def send_logs(self, active_run: mlflow.ActiveRun):
+        client = MlflowClient()
+        mlflow.log_text(self.tgt_preds_txt, "target_predictions.txt")
+        mlflow.log_text(self.src_preds_txt, "source_predictions.txt")
+        logging.info("Uploading logs")
+        for logs in batch(self.metric_history, 1000):
+            client.log_batch(run_id=active_run.info.run_id, metrics=logs)
+        self.reset_logs_history()
+
     def log_metrics(
         self,
-        step: int,
         y_ix: int,
         p_y_src: torch.Tensor,
         p_y_tgt: torch.Tensor,
@@ -54,33 +72,112 @@ class OverfitTrainer:
         new_lr: float,
     ) -> None:
         """Log metrics to mlflow."""
-
+        step = len(self.metric_history)
         p_y_src_ix = torch.argmax(p_y_src, dim=1)
         p_y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
-        log_idx("Correct probability", p_y_tgt[0], y_ix, step)
-        log_idx("Correct prime", prime, y_ix, step)
-        log_idx("Source Normalized Correct Prediction", p_y_src[0], y_ix, step)
-        log_idx("Target Normalized Correct Prediction", p_y_tgt[0], y_ix, step)
-        log_idx("Source Unnormalized Correct Prediction", y_src[0], y_ix, step)
-        log_idx("Target Unnormalized Correct Prediction", y_tgt[0], y_ix, step)
-        log_idx("Source Normalized Prediction", p_y_src[0], int(p_y_src_ix), step)
-        log_idx("Target Normalized Prediction", p_y_tgt[0], int(p_y_tgt_ix), step)
+        timestamp = int(time.time())
+        self.metric_history += [
+            get_log_idx(
+                "Correct probability", p_y_tgt[0], y_ix, step=step, timestamp=timestamp
+            ),
+            get_log_idx("Correct prime", prime, y_ix, step=step, timestamp=timestamp),
+            get_log_idx(
+                "Source Normalized Correct Prediction",
+                p_y_src[0],
+                y_ix,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_idx(
+                "Target Normalized Correct Prediction",
+                p_y_tgt[0],
+                y_ix,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_idx(
+                "Source Unnormalized Correct Prediction",
+                y_src[0],
+                y_ix,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_idx(
+                "Target Unnormalized Correct Prediction",
+                y_tgt[0],
+                y_ix,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_idx(
+                "Source Normalized Prediction",
+                p_y_src[0],
+                int(p_y_src_ix),
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_idx(
+                "Target Normalized Prediction",
+                p_y_tgt[0],
+                int(p_y_tgt_ix),
+                step=step,
+                timestamp=timestamp,
+            ),
+            Metric(
+                "Target Correct Rank",
+                rank(p_y_tgt[0], y_ix),
+                step=step,
+                timestamp=timestamp,
+            ),
+            Metric(
+                "Source Correct Rank",
+                rank(p_y_src[0], y_ix),
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_norm(
+                "Target Normalized Prediction Norm",
+                p_y_tgt,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_norm(
+                "Target Unnormalized Prediction Norm",
+                y_tgt,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_max(
+                "Target Normalized Prediction Max",
+                p_y_tgt,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_max(
+                "Target Unnormalized Prediction Max",
+                y_tgt,
+                step=step,
+                timestamp=timestamp,
+            ),
+            get_log_max(
+                "Source Unnormalized Prediction Max",
+                y_src,
+                step=step,
+                timestamp=timestamp,
+            ),
+            Metric("Source Prediction Entropy", H_src, step=step, timestamp=timestamp),
+            Metric("Learning Rate", new_lr, step=step, timestamp=timestamp),
+            get_log_norm("Prime Norm", prime, step=step, timestamp=timestamp),
+            get_log_max("Prime Max", prime, step=step, timestamp=timestamp),
+        ]
 
-        mlflow.log_metric("Target Correct Rank", rank(p_y_tgt[0], y_ix), step)
-        mlflow.log_metric("Source Correct Rank", rank(p_y_src[0], y_ix), step)
-
-        log_norm("Target Normalized Prediction Norm", p_y_tgt, step)
-        log_norm("Target Unnormalized Prediction Norm", y_tgt, step)
-        log_max("Target Normalized Prediction Max", p_y_tgt, step)
-        log_max("Target Unnormalized Prediction Max", y_tgt, step)
-        log_max("Source Unnormalized Prediction Max", y_src, step)
-        log_metric("Source Prediction Entropy", H_src, step)
-        log_metric("Learning Rate", new_lr, step)
-        log_norm("Prime Norm", prime, step)
-        log_max("Prime Max", prime, step)
+        tgt_cat = self.categories[int(p_y_tgt_ix.item())]
+        src_cat = self.categories[int(p_y_src_ix.item())]
+        self.tgt_preds_txt += f"[{step + 1}] {tgt_cat}\n"
+        self.src_preds_txt += f"[{step + 1}] {src_cat}\n"
 
     def forward_backward(
-        self, x: torch.Tensor, y_ix: Optional[int] = None, step: Optional[int] = None
+        self, x: torch.Tensor, y_ix: Optional[int] = None
     ) -> torch.Tensor:
         assert x.shape[0] == 1  # don't handle batched processing
         self.optimizer.zero_grad()
@@ -96,9 +193,8 @@ class OverfitTrainer:
         assert 0.0 <= H_src and H_src <= 1.0
         assert new_lr >= 0.0
 
-        if y_ix is not None and step is not None:
+        if y_ix is not None:
             self.log_metrics(
-                step=step,
                 y_ix=y_ix,
                 p_y_src=p_y_src,
                 p_y_tgt=p_y_tgt,
@@ -118,7 +214,7 @@ class OverfitTrainer:
         pseudo_loss.backward()
         self.optimizer.step()
 
-    def test(self, X: torch.Tensor, Y: List[int], categories: List[str]):
+    def test(self, X: torch.Tensor, Y: List[int], active_run: mlflow.ActiveRun):
         """
         X: video tensor on (T, C, H, W) format
         """
@@ -128,15 +224,6 @@ class OverfitTrainer:
         mlflow.log_param("confidence", self.confidence)
         assert len(X) == len(Y)
 
-        tgt_preds_txt = ""
-        src_preds_txt = ""
-        for step, x, y in tqdm(list(zip(range(len(X)), X, Y))):
-            x = x.unsqueeze(0)
-            tgt_pred = self.forward_backward(x, y, step)
-            src_pred = self.model.pretrained_classifier.forward(x)
-            tgt_cat = categories[tgt_pred[0].argmax().item()]  # type: ignore
-            src_cat = categories[src_pred[0].argmax().item()]  # type: ignore
-            tgt_preds_txt += f"[{step + 1}] {tgt_cat}\n"
-            src_preds_txt += f"[{step + 1}] {src_cat}\n"
-        mlflow.log_text(tgt_preds_txt, "target_predictions.txt")
-        mlflow.log_text(src_preds_txt, "source_predictions.txt")
+        for x, y in tqdm(list(zip(X, Y))):
+            _ = self.forward_backward(x.unsqueeze(0), y)
+        self.send_logs(active_run=active_run)

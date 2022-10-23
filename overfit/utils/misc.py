@@ -33,3 +33,11 @@ def sharpen(p: torch.Tensor, T, dim: int) -> torch.Tensor:
     """Increase temperature of distribution."""
     p_T = torch.pow(p, 1 / T)
     return p_T / torch.sum(p_T, dim=dim, keepdim=True)
+
+
+def batch(iterable, n=1):
+    """Generate batches of maximum size `n`"""
+    sz = len(iterable)
+    for ndx in range(0, sz, n):
+        mx = min(ndx + n, sz)
+        yield iterable[ndx:mx]

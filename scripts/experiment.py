@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 
 import mlflow
 from overfit.trainers.overfit import OverfitTrainer
@@ -7,6 +8,8 @@ from overfit.utils.io import normalize_rgb, uint8_to_float32
 from overfit.utils.misc import parse_video_filename_params
 from torchvision.io import read_video
 from torchvision.models import ResNet34_Weights, resnet34
+
+MLFLOW_SERVER = os.environ["MLFLOW_SERVER"]
 
 logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description="")
@@ -38,8 +41,9 @@ tgtnet_trainer.set(
     momentum=args.momentum,
 )
 
+
 logging.info("Starting experiment")
-mlflow.set_tracking_uri("http://localhost:5050")
+mlflow.set_tracking_uri(f"http://{MLFLOW_SERVER}:5050")
 with mlflow.start_run(experiment_id="0") as run:
     mlflow.log_param("Crop fraction", crop_fraction)
     mlflow.log_param("Frames", n_frames)

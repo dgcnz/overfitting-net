@@ -9,7 +9,7 @@ from overfit.utils.misc import parse_video_path_params
 from torchvision.io import read_video
 from torchvision.models import ResNet34_Weights, resnet34
 
-MLFLOW_HOST = os.environ["MLFLOW_SERVER"]
+MLFLOW_HOST = os.environ["MLFLOW_HOST"]
 
 logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description="")

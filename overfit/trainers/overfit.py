@@ -19,6 +19,7 @@ from overfit.utils.mlflow import get_log_idx, get_log_max, get_log_norm
 class OverfitTrainer:
     categories: List[str]
     metric_history: List[Metric] = []
+    step: int = 0
     tgt_preds_txt: str = ""
     src_preds_txt: str = ""
 
@@ -50,11 +51,23 @@ class OverfitTrainer:
         self.metric_history.clear()
         self.src_preds_txt = ""
         self.tgt_preds_txt = ""
+        self.step = 0
 
     def send_logs(self, active_run: mlflow.ActiveRun):
+        logging.info(mlflow.get_artifact_uri())
+        logging.info(mlflow.get_tracking_uri())
+        logging.info(mlflow.get_registry_uri())
         client = MlflowClient()
-        mlflow.log_text(self.tgt_preds_txt, "target_predictions.txt")
-        mlflow.log_text(self.src_preds_txt, "source_predictions.txt")
+        client.log_text(
+            run_id=active_run.info.run_id,
+            text=self.src_preds_txt,
+            artifact_file="source_predictions.txt",
+        )
+        client.log_text(
+            run_id=active_run.info.run_id,
+            text=self.tgt_preds_txt,
+            artifact_file="target_predictions.txt",
+        )
         logging.info("Uploading logs")
         for logs in batch(self.metric_history, 1000):
             client.log_batch(run_id=active_run.info.run_id, metrics=logs)
@@ -72,9 +85,12 @@ class OverfitTrainer:
         new_lr: float,
     ) -> None:
         """Log metrics to mlflow."""
-        step = len(self.metric_history)
-        p_y_src_ix = torch.argmax(p_y_src, dim=1)
-        p_y_tgt_ix = torch.argmax(p_y_tgt, dim=1)
+        step = self.step
+        p_y_src_ix = int(torch.argmax(p_y_src, dim=1).item())
+        p_y_tgt_ix = int(torch.argmax(p_y_tgt, dim=1).item())
+        assert isinstance(y_ix, int)
+        assert isinstance(p_y_src_ix, int)
+        assert isinstance(p_y_tgt_ix, int)
         timestamp = int(time.time())
         self.metric_history += [
             get_log_idx(
@@ -171,10 +187,11 @@ class OverfitTrainer:
             get_log_max("Prime Max", prime, step=step, timestamp=timestamp),
         ]
 
-        tgt_cat = self.categories[int(p_y_tgt_ix.item())]
-        src_cat = self.categories[int(p_y_src_ix.item())]
+        tgt_cat = self.categories[p_y_tgt_ix]
+        src_cat = self.categories[p_y_src_ix]
         self.tgt_preds_txt += f"[{step + 1}] {tgt_cat}\n"
         self.src_preds_txt += f"[{step + 1}] {src_cat}\n"
+        self.step += 1
 
     def forward_backward(
         self, x: torch.Tensor, y_ix: Optional[int] = None
@@ -201,8 +218,8 @@ class OverfitTrainer:
                 y_src=y_src,
                 y_tgt=y_tgt,
                 prime=self.model.prime,
-                new_lr=new_lr,
-                H_src=H_src,
+                new_lr=float(new_lr),
+                H_src=float(H_src),
             )
 
         self.update(new_lr, pseudo_loss)

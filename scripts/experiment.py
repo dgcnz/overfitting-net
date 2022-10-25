@@ -27,7 +27,7 @@ vid = normalize_rgb(vid)
 y_ix, _, crop_fraction, n_frames = parse_video_path_params(args.video_path)
 logging.info(crop_fraction)
 logging.info(n_frames)
-assert len(vid) == int(n_frames)
+assert len(vid) == int(n_frames), (len(vid), int(n_frames))
 
 logging.info("Creating trainer")
 srcnet = resnet34(weights=ResNet34_Weights.IMAGENET1K_V1).eval()
@@ -49,7 +49,7 @@ tgtnet_trainer.set(
 
 logging.info("Starting experiment")
 mlflow.set_tracking_uri(f"http://{MLFLOW_HOST}:5050")
-with mlflow.start_run(experiment_id="0") as run:
+with mlflow.start_run(experiment_id="15") as run:
     mlflow.log_param("Crop fraction", crop_fraction)
     mlflow.log_param("Frames", n_frames)
     tgtnet_trainer.test(vid, [y_ix] * n_frames, active_run=run)

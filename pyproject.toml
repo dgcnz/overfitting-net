@@ -16,6 +16,7 @@ tqdm = "^4.64.0"
 tensorboard = "^2.9.1"
 ipympl = "^0.9.1"
 av = "^9.2.0"
+pysftp = "^0.2.9"
 
 
 [tool.poetry.group.dev.dependencies]

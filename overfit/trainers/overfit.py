@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import mlflow
 import torch
@@ -28,7 +28,9 @@ class OverfitTrainer:
 
     def set(
         self,
-        pretrained_classifier=resnet152(weights=ResNet152_Weights.IMAGENET1K_V1),
+        pretrained_classifier: torch.nn.Module = resnet152(
+            weights=ResNet152_Weights.IMAGENET1K_V1
+        ),
         num_classes=1000,
         confidence=0.1,
         weight_decay=30,
@@ -194,9 +196,9 @@ class OverfitTrainer:
         self.step += 1
 
     def forward_backward(
-        self, x: torch.Tensor, y_ix: Optional[int] = None
+        self, x: Union[torch.Tensor, List[torch.Tensor]], y_ix: Optional[int] = None
     ) -> torch.Tensor:
-        assert x.shape[0] == 1  # don't handle batched processing
+        assert len(x) == 1  # don't handle batched processing
         self.optimizer.zero_grad()
         y_src = self.model.pretrained_classifier(x)
         y_tgt = self.model(x)
@@ -231,7 +233,13 @@ class OverfitTrainer:
         pseudo_loss.backward()
         self.optimizer.step()
 
-    def test(self, X: torch.Tensor, Y: List[int], active_run: mlflow.ActiveRun):
+    def test(
+        self,
+        X: torch.Tensor,
+        Y: List[int],
+        active_run: mlflow.ActiveRun,
+        hf_format: bool = False,
+    ):
         """
         X: video tensor on (T, C, H, W) format
         """
@@ -242,5 +250,8 @@ class OverfitTrainer:
         assert len(X) == len(Y)
 
         for x, y in tqdm(list(zip(X, Y))):
-            _ = self.forward_backward(x.unsqueeze(0), y)
+            if hf_format:
+                _ = self.forward_backward([x], y)
+            else:
+                _ = self.forward_backward(x.unsqueeze(0), y)
         self.send_logs(active_run=active_run)

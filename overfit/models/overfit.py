@@ -1,5 +1,3 @@
-import math
-
 import torch
 from torchvision.models import ResNet152_Weights, resnet152
 
@@ -10,7 +8,9 @@ class Overfit(torch.nn.Module):
 
     def __init__(
         self,
-        pretrained_classifier=resnet152(weights=ResNet152_Weights.IMAGENET1K_V1),
+        pretrained_classifier: torch.nn.Module = resnet152(
+            weights=ResNet152_Weights.IMAGENET1K_V1
+        ),
         num_classes=1000,
     ):
         super().__init__()
@@ -21,7 +21,6 @@ class Overfit(torch.nn.Module):
         self.prime = torch.nn.Parameter(  # type: ignore
             torch.zeros(self.num_classes), requires_grad=True
         )
-
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y_src = self.pretrained_classifier(x)

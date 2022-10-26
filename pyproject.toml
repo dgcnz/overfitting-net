@@ -17,6 +17,8 @@ tensorboard = "^2.9.1"
 ipympl = "^0.9.1"
 av = "^9.2.0"
 pysftp = "^0.2.9"
+transformers = "^4.23.1"
+datasets = "^2.6.1"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -115,3 +115,4 @@ mlflow-artifacts/
 notebooks/mlruns
 **/lightning_logs/
 **/mnist/
+data/

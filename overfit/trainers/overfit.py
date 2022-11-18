@@ -1,5 +1,4 @@
 import logging
-import time
 from typing import List, Optional, Union
 
 import mlflow
@@ -12,7 +11,7 @@ from torchvision.models import ResNet152_Weights, resnet152
 from tqdm import tqdm
 
 from overfit.models.overfit import Overfit
-from overfit.utils.misc import batch, entropy, rank, sharpen
+from overfit.utils.misc import batch, entropy, rank
 from overfit.utils.mlflow import get_log_idx, get_log_max, get_log_norm
 
 
@@ -20,6 +19,8 @@ class OverfitTrainer:
     categories: List[str]
     metric_history: List[Metric] = []
     step: int = 0
+    src_acc_correct: int = 0
+    tgt_acc_correct: int = 0
     tgt_preds_txt: str = ""
     src_preds_txt: str = ""
 
@@ -53,6 +54,8 @@ class OverfitTrainer:
         self.metric_history.clear()
         self.src_preds_txt = ""
         self.tgt_preds_txt = ""
+        self.src_acc_correct = 0
+        self.tgt_acc_correct = 0
         self.step = 0
 
     def send_logs(self, active_run: mlflow.ActiveRun):
@@ -93,8 +96,22 @@ class OverfitTrainer:
         assert isinstance(y_ix, int)
         assert isinstance(p_y_src_ix, int)
         assert isinstance(p_y_tgt_ix, int)
-        timestamp = int(time.time())
+        timestamp = step
+        self.tgt_acc_correct += p_y_tgt_ix == y_ix
+        self.src_acc_correct += p_y_src_ix == y_ix
         self.metric_history += [
+            Metric(
+                key="Source Accumulated Correct Count",
+                value=self.src_acc_correct,
+                step=step,
+                timestamp=timestamp,
+            ),
+            Metric(
+                key="Target Accumulated Correct Count",
+                value=self.tgt_acc_correct,
+                step=step,
+                timestamp=timestamp,
+            ),
             get_log_idx(
                 "Correct probability", p_y_tgt[0], y_ix, step=step, timestamp=timestamp
             ),

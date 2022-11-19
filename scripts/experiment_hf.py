@@ -9,14 +9,17 @@ from overfit.utils.misc import parse_video_path_params
 from torchvision.io import read_video
 
 MLFLOW_HOST = os.environ["MLFLOW_HOST"]
+MLFLOW_EXPERIMENT_ID = os.environ["MLFLOW_EXPERIMENT_ID"]
+assert MLFLOW_EXPERIMENT_ID
+assert MLFLOW_HOST
 
 logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("video_path", type=str, help="Video path.")
-parser.add_argument("--confidence", type=float, help="Confidence", default=0.5)
-parser.add_argument("--weight_decay", type=float, help="Weight Decay", default=0.9)
-parser.add_argument("--max_lr", type=float, help="Max Learning rate", default=0.1)
-parser.add_argument("--momentum", type=float, help="Momentum", default=0.9)
+parser.add_argument("--confidence", type=float, help="Confidence", default=0.1)
+parser.add_argument("--weight_decay", type=float, help="Weight Decay", default=0.2)
+parser.add_argument("--max_lr", type=float, help="Max Learning rate", default=0.25)
+parser.add_argument("--momentum", type=float, help="Momentum", default=0.1)
 
 args = parser.parse_args()
 
@@ -45,11 +48,11 @@ tgtnet_trainer.set(
     momentum=args.momentum,
 )
 
-
 logging.info("Starting experiment")
 mlflow.set_tracking_uri(f"http://{MLFLOW_HOST}:5050")
-with mlflow.start_run(experiment_id="15") as run:
+with mlflow.start_run(experiment_id=MLFLOW_EXPERIMENT_ID) as run:
     mlflow.log_param("Crop fraction", crop_fraction)
     mlflow.log_param("Frames", n_frames)
     mlflow.log_param("Filename", args.video_path)
+    mlflow.log_param("Source Model", "ViT")
     tgtnet_trainer.test(vid, [y_ix] * n_frames, active_run=run, hf_format=True)

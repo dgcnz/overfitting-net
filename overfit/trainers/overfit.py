@@ -11,7 +11,7 @@ from torchvision.models import ResNet152_Weights, resnet152
 from tqdm import tqdm
 
 from overfit.models.overfit import Overfit
-from overfit.utils.misc import batch, entropy, rank
+from overfit.utils.misc import batch, entropy, rank, sharpen
 from overfit.utils.mlflow import get_log_idx, get_log_max, get_log_norm
 
 
@@ -221,8 +221,8 @@ class OverfitTrainer:
         y_tgt = self.model(x)
         p_y_src = F.softmax(y_src, dim=1)
         p_y_tgt = F.softmax(y_tgt, dim=1)
-        # y_pseudo = sharpen(p_y_tgt, 1 - self.confidence, dim=1)
-        y_pseudo = F.softmax(p_y_tgt, dim=1)
+        y_pseudo = sharpen(p_y_tgt, 1 - self.confidence, dim=1)
+        # y_pseudo = F.softmax(p_y_tgt, dim=1)
         pseudo_loss = F.cross_entropy(y_tgt, y_pseudo)
 
         H_src = entropy(logits=y_src)[0].item()

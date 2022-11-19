@@ -28,15 +28,15 @@ def generate_video(img_path: str, crop_fraction: int, max_length: int) -> str:
     out_name = (
         VIDEO_OUT_PATH / f"{image_filename}-{crop_fraction}-{len(video_tensor)}.mp4"
     )
-    write_video(filename=str(out_name), video_array=video_tensor, fps=20)
+    write_video(filename=str(out_name), video_array=video_tensor, fps=15)
     return str(out_name)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("img_path", type=str, help="Source image path.")
-    parser.add_argument("--crop_fraction", type=int, help="Crop fraction", default=3)
-    parser.add_argument("--max_length", type=int, help="Max length", default=100)
+    parser.add_argument("--crop_fraction", type=int, help="Crop fraction", default=5)
+    parser.add_argument("--max_length", type=int, help="Max length", default=75)
     args = parser.parse_args()
     out_name = generate_video(
         img_path=args.img_path,

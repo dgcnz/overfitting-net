@@ -8,10 +8,10 @@ from overfit.trainers.overfit import OverfitTrainer
 from overfit.utils.misc import parse_video_path_params
 from torchvision.io import read_video
 
-MLFLOW_HOST = os.environ["MLFLOW_HOST"]
+MLFLOW_TRACKING_URI = os.environ["MLFLOW_TRACKING_URI"]
 MLFLOW_EXPERIMENT_ID = os.environ["MLFLOW_EXPERIMENT_ID"]
 assert MLFLOW_EXPERIMENT_ID
-assert MLFLOW_HOST
+assert MLFLOW_TRACKING_URI
 
 logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description="")
@@ -49,7 +49,7 @@ tgtnet_trainer.set(
 )
 
 logging.info("Starting experiment")
-mlflow.set_tracking_uri(f"http://{MLFLOW_HOST}:5050")
+mlflow.set_tracking_uri(f"{MLFLOW_TRACKING_URI}")
 with mlflow.start_run(experiment_id=MLFLOW_EXPERIMENT_ID) as run:
     mlflow.log_param("Crop fraction", crop_fraction)
     mlflow.log_param("Frames", n_frames)

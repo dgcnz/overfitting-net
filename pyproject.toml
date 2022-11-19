@@ -19,6 +19,7 @@ av = "^9.2.0"
 pysftp = "^0.2.9"
 transformers = "^4.23.1"
 datasets = "^2.6.1"
+pydantic = {extras = ["dotenv"], version = "^1.10.2"}
 
 
 [tool.poetry.group.dev.dependencies]

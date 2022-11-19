@@ -6,5 +6,5 @@ do
         break
     fi
     echo "$entry"
-    python -m scripts.genvideo $entry --crop_fraction 5 --max_length 75
+    VIDEO_OUT_PATH="data/video/6-75" python -m scripts.genvideo $entry --crop_fraction 6 --max_length 75
 done

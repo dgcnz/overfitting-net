@@ -19,8 +19,10 @@ class OverfitTrainer:
     categories: List[str]
     metric_history: List[Metric] = []
     step: int = 0
-    src_acc_correct: int = 0
-    tgt_acc_correct: int = 0
+    src_acc_top1: int = 0
+    tgt_acc_top1: int = 0
+    src_acc_top5: int = 0
+    tgt_acc_top5: int = 0
     tgt_preds_txt: str = ""
     src_preds_txt: str = ""
 
@@ -54,8 +56,10 @@ class OverfitTrainer:
         self.metric_history.clear()
         self.src_preds_txt = ""
         self.tgt_preds_txt = ""
-        self.src_acc_correct = 0
-        self.tgt_acc_correct = 0
+        self.src_acc_top1 = 0
+        self.tgt_acc_top1 = 0
+        self.src_acc_top5 = 0
+        self.tgt_acc_top5 = 0
         self.step = 0
 
     def send_logs(self, active_run: mlflow.ActiveRun):
@@ -93,22 +97,38 @@ class OverfitTrainer:
         step = self.step
         p_y_src_ix = int(torch.argmax(p_y_src, dim=1).item())
         p_y_tgt_ix = int(torch.argmax(p_y_tgt, dim=1).item())
+        p_src_rank = rank(p_y_src[0], y_ix)
+        p_tgt_rank = rank(p_y_tgt[0], y_ix)
         assert isinstance(y_ix, int)
         assert isinstance(p_y_src_ix, int)
         assert isinstance(p_y_tgt_ix, int)
         timestamp = step
-        self.tgt_acc_correct += p_y_tgt_ix == y_ix
-        self.src_acc_correct += p_y_src_ix == y_ix
+        self.tgt_acc_top1 += p_y_tgt_ix == y_ix
+        self.src_acc_top1 += p_y_src_ix == y_ix
+        self.tgt_acc_top5 += p_src_rank < 5
+        self.src_acc_top5 += p_tgt_rank < 5
         self.metric_history += [
             Metric(
-                key="Source Accumulated Correct Count",
-                value=self.src_acc_correct,
+                key="Source Accumulated Top-1 Count",
+                value=self.src_acc_top1,
                 step=step,
                 timestamp=timestamp,
             ),
             Metric(
-                key="Target Accumulated Correct Count",
-                value=self.tgt_acc_correct,
+                key="Target Accumulated Top-1 Count",
+                value=self.tgt_acc_top1,
+                step=step,
+                timestamp=timestamp,
+            ),
+            Metric(
+                key="Source Accumulated Top-5 Count",
+                value=self.src_acc_top1,
+                step=step,
+                timestamp=timestamp,
+            ),
+            Metric(
+                key="Target Accumulated Top-5 Count",
+                value=self.tgt_acc_top1,
                 step=step,
                 timestamp=timestamp,
             ),
@@ -160,13 +180,13 @@ class OverfitTrainer:
             ),
             Metric(
                 "Target Correct Rank",
-                rank(p_y_tgt[0], y_ix),
+                p_tgt_rank,
                 step=step,
                 timestamp=timestamp,
             ),
             Metric(
                 "Source Correct Rank",
-                rank(p_y_src[0], y_ix),
+                p_src_rank,
                 step=step,
                 timestamp=timestamp,
             ),

@@ -1,4 +1,4 @@
-search_dir=data/video
+search_dir=data/video/6-75
 MLFLOW_HOST="${MLFLOW_HOST}"
 MLFLOW_EXPERIMENT_ID="${MLFLOW_EXPERIMENT_ID}"
 echo $MLFLOW_HOST

@@ -34,7 +34,7 @@ def get_log_norm(name: str, x: torch.Tensor, step: int, timestamp: int):
 def get_log_idx(name: str, x: torch.Tensor, idx: int, step: int, timestamp: int):
     return Metric(
         key=name,
-        value=float(x.cpu().detach().numpy()[idx]),
+        value=float(x.detach().cpu().numpy()[idx]),
         timestamp=timestamp,
         step=step,
     )

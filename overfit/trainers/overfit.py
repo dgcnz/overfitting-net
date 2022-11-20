@@ -93,6 +93,11 @@ class OverfitTrainer:
         H_src: float,
         new_lr: float,
     ) -> None:
+        p_y_src = p_y_src.cpu()
+        p_y_tgt = p_y_tgt.cpu()
+        y_src = y_src.cpu()
+        y_tgt = y_tgt.cpu()
+        prime = prime.cpu()
         """Log metrics to mlflow."""
         step = self.step
         p_y_src_ix = int(torch.argmax(p_y_src, dim=1).item())

@@ -287,7 +287,7 @@ class OverfitTrainer:
         mlflow.log_param("confidence", self.confidence)
         assert len(X) == len(Y)
 
-        for x, y in tqdm(list(zip(X, Y))):
+        for x, y in list(zip(X, Y)):
             if hf_format:
                 _ = self.forward_backward([x], y)
             else:

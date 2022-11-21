@@ -38,3 +38,25 @@ def get_log_idx(name: str, x: torch.Tensor, idx: int, step: int, timestamp: int)
         timestamp=timestamp,
         step=step,
     )
+
+
+def get_or_create_experiment_by_name(client, experiment_name: str) -> str:
+    """
+    Creates or fetches experiment by MLFLOW_EXPERIMENT_NAME
+    Returns MLFLOW_EXPERIMENT_ID
+    """
+    try:
+        return client.create_experiment(experiment_name)
+    except Exception:
+        return client.get_experiment_by_name(experiment_name).experiment_id
+
+
+def get_experiment_name(
+    dataset: str,
+    model: str,
+    confidence: float,
+    weight_decay: float,
+    max_lr: float,
+    momentum: float,
+):
+    return f"D{dataset}M{model}C{confidence}WD{weight_decay}LR{max_lr}M{momentum}"

@@ -3,6 +3,16 @@ from pathlib import Path
 from typing import Tuple
 
 import torch
+from torchvision.models import (
+    ResNet18_Weights,
+    ResNet34_Weights,
+    ResNet50_Weights,
+    ViT_B_16_Weights,
+    resnet18,
+    resnet34,
+    resnet50,
+    vit_b_16,
+)
 
 
 def floor_even(x: int) -> int:
@@ -41,3 +51,16 @@ def batch(iterable, n=1):
     for ndx in range(0, sz, n):
         mx = min(ndx + n, sz)
         yield iterable[ndx:mx]
+
+
+def get_source_model(model: str, device):
+    if model == "vit":
+        return vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_V1).eval().to(device)
+    elif model == "resnet34":
+        return resnet34(weights=ResNet34_Weights.IMAGENET1K_V1).eval().to(device)
+    elif model == "resnet50":
+        return resnet50(weights=ResNet50_Weights.IMAGENET1K_V1).eval().to(device)
+    elif model == "resnet18":
+        return resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).eval().to(device)
+    else:
+        raise Exception("Unknown Source model")

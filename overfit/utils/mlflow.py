@@ -74,10 +74,10 @@ def get_params_from_experiment_name(experiment_name: str) -> Dict[str, Any]:
     return {
         "dataset": dataset,
         "model": model,
-        "confidence": confidence,
-        "weight_decay": weight_decay,
-        "max_lr": max_lr,
-        "momentum": momentum,
+        "confidence": float(confidence),
+        "weight_decay": float(weight_decay),
+        "max_lr": float(max_lr),
+        "momentum": float(momentum),
     }
 
 
@@ -102,3 +102,8 @@ def get_all_experiments(
             datasets, models, confidences, weight_decays, max_lrs, momentums
         )
     ]
+
+
+def is_experiment_empty(client, experiment_id: str) -> bool:
+    runs = client.search_runs(experiment_id, max_results=1)
+    return len(runs) == 0

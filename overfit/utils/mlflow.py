@@ -1,3 +1,7 @@
+import itertools
+import re
+from typing import Any, Dict, List
+
 import torch
 
 from mlflow import log_metric
@@ -60,3 +64,41 @@ def get_experiment_name(
     momentum: float,
 ):
     return f"D{dataset}M{model}C{confidence}WD{weight_decay}LR{max_lr}M{momentum}"
+
+
+def get_params_from_experiment_name(experiment_name: str) -> Dict[str, Any]:
+    pattern = r"D(.*)M(.*)C(.*)WD(.*)LR(.*)M(.*)"
+    ans = re.search(pattern, experiment_name)
+    assert ans is not None
+    dataset, model, confidence, weight_decay, max_lr, momentum = ans.groups()
+    return {
+        "dataset": dataset,
+        "model": model,
+        "confidence": confidence,
+        "weight_decay": weight_decay,
+        "max_lr": max_lr,
+        "momentum": momentum,
+    }
+
+
+def get_all_experiments(
+    datasets: List[str],
+    models: List[str],
+    confidences: List[float],
+    weight_decays: List[float],
+    max_lrs: List[float],
+    momentums: List[float],
+):
+    return [
+        get_experiment_name(
+            dataset=dataset,
+            model=model,
+            confidence=confidence,
+            weight_decay=weight_decay,
+            max_lr=max_lr,
+            momentum=momentum,
+        )
+        for dataset, model, confidence, weight_decay, max_lr, momentum in itertools.product(  # noqa
+            datasets, models, confidences, weight_decays, max_lrs, momentums
+        )
+    ]

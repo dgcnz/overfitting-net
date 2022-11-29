@@ -16,7 +16,7 @@ tqdm = "^4.64.0"
 tensorboard = "^2.9.1"
 ipympl = "^0.9.1"
 av = "^9.2.0"
-pysftp = "^0.2.9"
+pysftp = "0.2.8"
 transformers = "^4.23.1"
 datasets = "^2.6.1"
 pydantic = {extras = ["dotenv"], version = "^1.10.2"}
@@ -28,6 +28,7 @@ flake8 = "^5.0.4"
 black = "^22.6.0"
 isort = "^5.10.1"
 pytorch-lightning = "^1.8.0.post1"
+mlflow-export-import = "^1.0.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

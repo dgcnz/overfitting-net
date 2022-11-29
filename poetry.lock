@@ -1022,6 +1022,18 @@ pipelines = ["scikit-learn (>=1.0)", "pyarrow (>=7.0)", "shap (>=0.40)", "pandas
 sqlserver = ["mlflow-dbstore"]
 
 [[package]]
+name = "mlflow-export-import"
+version = "1.0.9"
+description = "Copy MLflow objects (experiments, runs or registered models) to another tracking server"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+mlflow = ">=1.26.0"
+wheel = "*"
+
+[[package]]
 name = "multidict"
 version = "6.0.2"
 description = "multidict implementation"
@@ -1393,14 +1405,14 @@ diagrams = ["railroad-diagrams", "jinja2"]
 
 [[package]]
 name = "pysftp"
-version = "0.2.9"
+version = "0.2.8"
 description = "A friendly face on SFTP"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-paramiko = ">=1.17"
+paramiko = ">=1.7.7"
 
 [[package]]
 name = "python-dateutil"
@@ -2049,7 +2061,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "8be06fa7d92e9ba33c9e3021db9ad1e92cfd0787aaa56d14a8aea9ce957a4a02"
+content-hash = "5cc995b41c8f553f4cf487ac2f7cabe334b6c26fd2933e85a07e7bf9c0bb8ed6"
 
 [metadata.files]
 absl-py = [
@@ -2966,6 +2978,9 @@ mlflow = [
     {file = "mlflow-1.30.0-py3-none-any.whl", hash = "sha256:c464f40e902e4fc1f040f03dbb10b5b729a1fc5797e0d0f2e28c50481a416135"},
     {file = "mlflow-1.30.0.tar.gz", hash = "sha256:2e7d51f6e2dc6cc2316e72dcf4135217c581c8f4f1f9dde1066aaba9e0b22c7a"},
 ]
+mlflow-export-import = [
+    {file = "mlflow_export_import-1.0.9-py3-none-any.whl", hash = "sha256:cf79980a58b81399d250878a09d749a48cb2a79b5b1b2502edbb022e366d055b"},
+]
 multidict = [
     {file = "multidict-6.0.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:0b9e95a740109c6047602f4db4da9949e6c5945cefbad34a1299775ddc9a62e2"},
     {file = "multidict-6.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ac0e27844758d7177989ce406acc6a83c16ed4524ebc363c1f748cba184d89d3"},
@@ -3431,7 +3446,7 @@ pyparsing = [
     {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
 ]
 pysftp = [
-    {file = "pysftp-0.2.9.tar.gz", hash = "sha256:fbf55a802e74d663673400acd92d5373c1c7ee94d765b428d9f977567ac4854a"},
+    {file = "pysftp-0.2.8.tar.gz", hash = "sha256:1542830918c8dd51599973b0b3b479c621da83df31a31820d333b2673dfac9b4"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},

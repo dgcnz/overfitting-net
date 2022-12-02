@@ -36,7 +36,7 @@ class OverfitTrainer:
         ),
         num_classes=1000,
         confidence=0.1,
-        weight_decay=30,
+        weight_decay=0.1,
         max_lr=0.1,
         momentum=0.9,
     ):
